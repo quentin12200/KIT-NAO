@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Initialize database with Alembic migrations safely."""
 import sys
+import os
 import subprocess
-from sqlalchemy import create_engine, inspect, text
-from app.config import settings
+from sqlalchemy import create_engine, inspect
 
 
 def check_tables_exist(engine):
@@ -26,7 +26,12 @@ def main():
     print("🔍 Checking database state...")
 
     try:
-        engine = create_engine(settings.DATABASE_URL)
+        database_url = os.environ.get("DATABASE_URL")
+        if not database_url:
+            print("❌ DATABASE_URL environment variable not set")
+            sys.exit(1)
+
+        engine = create_engine(database_url)
 
         tables_exist = check_tables_exist(engine)
         alembic_version_exists = check_alembic_version_exists(engine)
