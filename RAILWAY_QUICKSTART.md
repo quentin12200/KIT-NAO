@@ -39,4 +39,32 @@ Via Swagger UI (`/docs`) → `POST /api/auth/register` :
 
 ---
 
-📖 Guide complet : [DEPLOYMENT_RAILWAY.md](./DEPLOYMENT_RAILWAY.md)
+## 🔧 Dépannage
+
+### Erreur : "Connection refused" PostgreSQL
+
+Si tu vois cette erreur dans les logs :
+```
+connection to server at "localhost" failed: Connection refused
+```
+
+➡️ **Consulte le guide** : [RAILWAY_DATABASE_FIX.md](./RAILWAY_DATABASE_FIX.md)
+
+**Solution rapide** :
+1. Va sur le service **PostgreSQL** → Variables
+2. Copie la variable `DATABASE_URL`
+3. Va sur le service **KIT-NAO** → Variables
+4. Ajoute une référence vers `DATABASE_URL` du service Postgres
+
+### Vérifier la configuration
+
+Lance le script de diagnostic :
+```bash
+python3 scripts/check_config.py
+```
+
+---
+
+📖 Guides complets :
+- [RAILWAY_DATABASE_FIX.md](./RAILWAY_DATABASE_FIX.md) - Corriger la connexion PostgreSQL
+- [DEPLOYMENT_RAILWAY.md](./DEPLOYMENT_RAILWAY.md) - Guide de déploiement détaillé
