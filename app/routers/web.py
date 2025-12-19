@@ -244,7 +244,7 @@ async def campaign_create(
     start_date: str = Form(None),
     end_date: str = Form(None),
     description: str = Form(None),
-    status: str = Form("draft")
+    campaign_status: str = Form("draft")
 ):
     """Handle campaign creation form submission."""
     user = await get_current_user_optional(request, db)
@@ -274,7 +274,7 @@ async def campaign_create(
             start_date=parsed_start_date,
             end_date=parsed_end_date,
             description=description,
-            status=status
+            status=campaign_status
         )
 
         db.add(new_campaign)
