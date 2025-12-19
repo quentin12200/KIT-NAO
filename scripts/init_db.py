@@ -3,7 +3,7 @@
 import sys
 import os
 import subprocess
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import create_engine, inspect, text
 
 
 def check_tables_exist(engine):
@@ -15,10 +15,19 @@ def check_tables_exist(engine):
     return any(table in tables for table in app_tables)
 
 
-def check_alembic_version_exists(engine):
-    """Check if alembic_version table exists."""
+def get_alembic_current_version(engine):
+    """Get current alembic version from database, or None if not set."""
     inspector = inspect(engine)
-    return 'alembic_version' in inspector.get_table_names()
+    if 'alembic_version' not in inspector.get_table_names():
+        return None
+
+    try:
+        with engine.connect() as conn:
+            result = conn.execute(text("SELECT version_num FROM alembic_version"))
+            row = result.fetchone()
+            return row[0] if row else None
+    except Exception:
+        return None
 
 
 def main():
@@ -34,13 +43,13 @@ def main():
         engine = create_engine(database_url)
 
         tables_exist = check_tables_exist(engine)
-        alembic_version_exists = check_alembic_version_exists(engine)
+        current_version = get_alembic_current_version(engine)
 
         print(f"  Tables exist: {tables_exist}")
-        print(f"  Alembic version table exists: {alembic_version_exists}")
+        print(f"  Alembic current version: {current_version if current_version else 'None'}")
 
-        if tables_exist and not alembic_version_exists:
-            # Tables were created without Alembic, stamp the current version
+        if tables_exist and not current_version:
+            # Tables exist but Alembic doesn't know about them
             print("✅ Tables exist but not tracked by Alembic")
             print("🏷️  Stamping database with current migration version...")
             result = subprocess.run(
@@ -70,6 +79,8 @@ def main():
 
     except Exception as e:
         print(f"❌ Error: {e}")
+        import traceback
+        traceback.print_exc()
         sys.exit(1)
 
 
