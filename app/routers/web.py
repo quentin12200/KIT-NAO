@@ -71,9 +71,10 @@ async def login_submit(
     response.set_cookie(
         key="access_token",
         value=f"Bearer {access_token}",
-        httponly=True,
+        httponly=False,  # Must be False to allow JavaScript to read the token
         max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-        samesite="lax"
+        samesite="lax",
+        secure=False  # Set to True in production with HTTPS
     )
     return response
 
