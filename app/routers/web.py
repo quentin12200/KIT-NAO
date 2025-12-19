@@ -162,3 +162,117 @@ async def dashboard(
             "campaigns": campaigns
         }
     )
+
+
+# ===== Campaign Routes =====
+
+@router.get("/campaigns", response_class=HTMLResponse)
+async def campaigns_list(request: Request, db: Session = Depends(get_db)):
+    """Campaigns list page (protected)."""
+    user = await get_current_user_optional(request, db)
+    if not user:
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+
+    from app.models.campaign import Campaign
+
+    # Get campaigns for user's organization
+    query = db.query(Campaign)
+    if not user.is_superuser and user.organization_id:
+        query = query.filter(Campaign.organization_id == user.organization_id)
+
+    campaigns = query.order_by(Campaign.created_at.desc()).all()
+
+    return templates.TemplateResponse(
+        "campaigns.html",
+        {
+            "request": request,
+            "user": user,
+            "campaigns": campaigns
+        }
+    )
+
+
+@router.get("/campaigns/new", response_class=HTMLResponse)
+async def campaign_new(request: Request, db: Session = Depends(get_db)):
+    """New campaign page (protected)."""
+    user = await get_current_user_optional(request, db)
+    if not user:
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+
+    from app.models.organization import Organization
+
+    # Get organizations for dropdown
+    organizations = None
+    if user.is_superuser:
+        organizations = db.query(Organization).all()
+
+    return templates.TemplateResponse(
+        "campaign_new.html",
+        {
+            "request": request,
+            "user": user,
+            "organizations": organizations
+        }
+    )
+
+
+@router.get("/campaigns/{campaign_id}", response_class=HTMLResponse)
+async def campaign_detail(
+    request: Request,
+    campaign_id: int,
+    db: Session = Depends(get_db)
+):
+    """Campaign detail page (protected)."""
+    user = await get_current_user_optional(request, db)
+    if not user:
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+
+    from app.models.campaign import Campaign
+    from app.models.document import Document
+    from app.models.meeting import Meeting
+
+    # Get campaign
+    campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
+
+    if not campaign:
+        return templates.TemplateResponse(
+            "campaigns.html",
+            {
+                "request": request,
+                "user": user,
+                "error": "Campagne introuvable",
+                "campaigns": []
+            },
+            status_code=404
+        )
+
+    # Check access
+    if (
+        not user.is_superuser
+        and user.organization_id != campaign.organization_id
+    ):
+        return templates.TemplateResponse(
+            "campaigns.html",
+            {
+                "request": request,
+                "user": user,
+                "error": "Accès non autorisé à cette campagne",
+                "campaigns": []
+            },
+            status_code=403
+        )
+
+    # Get counts
+    documents_count = db.query(Document).filter(Document.campaign_id == campaign_id).count()
+    meetings_count = db.query(Meeting).filter(Meeting.campaign_id == campaign_id).count()
+
+    return templates.TemplateResponse(
+        "campaign_detail.html",
+        {
+            "request": request,
+            "user": user,
+            "campaign": campaign,
+            "documents_count": documents_count,
+            "meetings_count": meetings_count
+        }
+    )

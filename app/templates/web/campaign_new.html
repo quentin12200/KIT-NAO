@@ -1,0 +1,327 @@
+{% extends "base.html" %}
+
+{% block title %}Nouvelle Campagne - Plateforme NAO{% endblock %}
+
+{% block content %}
+<section class="form-section">
+    <div class="container">
+        <div class="form-header">
+            <a href="/campaigns" class="back-link">← Retour aux campagnes</a>
+            <h1>Créer une nouvelle campagne NAO</h1>
+            <p>Remplissez les informations ci-dessous pour démarrer votre campagne</p>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-error">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <div class="form-card">
+            <form id="campaignForm" class="campaign-form">
+                <div class="form-section-title">
+                    <h2>Informations générales</h2>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="title">Titre de la campagne *</label>
+                        <input
+                            type="text"
+                            id="title"
+                            name="title"
+                            required
+                            placeholder="Ex: NAO 2025"
+                            maxlength="255"
+                        >
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="establishment_name">Nom de l'établissement *</label>
+                        <input
+                            type="text"
+                            id="establishment_name"
+                            name="establishment_name"
+                            required
+                            placeholder="Ex: Entreprise XYZ"
+                            maxlength="255"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sector">Secteur d'activité</label>
+                        <input
+                            type="text"
+                            id="sector"
+                            name="sector"
+                            placeholder="Ex: Industrie, Services, Commerce..."
+                            maxlength="100"
+                        >
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="employee_count">Nombre d'employés</label>
+                        <input
+                            type="number"
+                            id="employee_count"
+                            name="employee_count"
+                            min="1"
+                            placeholder="Ex: 50"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="collective_agreement">Convention collective</label>
+                        <input
+                            type="text"
+                            id="collective_agreement"
+                            name="collective_agreement"
+                            placeholder="Ex: Métallurgie (IDCC 3248)"
+                            maxlength="100"
+                        >
+                    </div>
+                </div>
+
+                {% if organizations %}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="organization_id">Organisation *</label>
+                        <select id="organization_id" name="organization_id" required>
+                            {% for org in organizations %}
+                            <option value="{{ org.id }}" {% if org.id == user.organization_id %}selected{% endif %}>
+                                {{ org.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                {% else %}
+                <input type="hidden" id="organization_id" name="organization_id" value="{{ user.organization_id or 1 }}">
+                {% endif %}
+
+                <div class="form-section-title">
+                    <h2>Calendrier</h2>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="start_date">Date de début</label>
+                        <input
+                            type="date"
+                            id="start_date"
+                            name="start_date"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="end_date">Date de fin prévue</label>
+                        <input
+                            type="date"
+                            id="end_date"
+                            name="end_date"
+                        >
+                    </div>
+                </div>
+
+                <div class="form-section-title">
+                    <h2>Détails</h2>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea
+                            id="description"
+                            name="description"
+                            rows="5"
+                            placeholder="Décrivez le contexte et les objectifs de cette campagne NAO..."
+                        ></textarea>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="status">Statut initial</label>
+                        <select id="status" name="status">
+                            <option value="draft">Brouillon</option>
+                            <option value="active">Active</option>
+                        </select>
+                        <small>Vous pouvez commencer en mode brouillon et activer plus tard</small>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a href="/campaigns" class="btn btn-outline">Annuler</a>
+                    <button type="submit" class="btn btn-primary">
+                        Créer la campagne
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.form-section {
+    padding: 3rem 0;
+}
+
+.form-header {
+    margin-bottom: 2rem;
+}
+
+.back-link {
+    display: inline-block;
+    color: var(--primary-color);
+    text-decoration: none;
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+.form-header h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.form-header p {
+    color: var(--text-light);
+}
+
+.form-card {
+    background: var(--bg-white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    padding: 2.5rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.campaign-form {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.form-section-title {
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+.form-section-title h2 {
+    font-size: 1.25rem;
+    color: var(--text-dark);
+    margin: 0;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.2s;
+    resize: vertical;
+}
+
+textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+@media (max-width: 768px) {
+    .form-card {
+        padding: 1.5rem;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('campaignForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const formData = {
+        title: document.getElementById('title').value,
+        establishment_name: document.getElementById('establishment_name').value,
+        sector: document.getElementById('sector').value || null,
+        employee_count: document.getElementById('employee_count').value ? parseInt(document.getElementById('employee_count').value) : null,
+        collective_agreement: document.getElementById('collective_agreement').value || null,
+        organization_id: parseInt(document.getElementById('organization_id').value),
+        start_date: document.getElementById('start_date').value || null,
+        end_date: document.getElementById('end_date').value || null,
+        description: document.getElementById('description').value || null,
+        status: document.getElementById('status').value
+    };
+
+    try {
+        // Get token from cookie
+        const token = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('access_token='))
+            ?.split('=')[1];
+
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+
+        const response = await fetch('/api/campaigns/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': token
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            window.location.href = '/campaigns/' + data.id;
+        } else {
+            alert('Erreur: ' + (data.detail || 'Erreur lors de la création de la campagne'));
+        }
+    } catch (error) {
+        alert('Erreur de connexion au serveur');
+    }
+});
+</script>
+{% endblock %}

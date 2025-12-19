@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}Mes Campagnes - Plateforme NAO{% endblock %}
+
+{% block content %}
+<section class="campaigns-section">
+    <div class="container">
+        <div class="page-header">
+            <div>
+                <h1>Mes Campagnes NAO</h1>
+                <p>Gérez toutes vos campagnes de négociation</p>
+            </div>
+            <a href="/campaigns/new" class="btn btn-primary">
+                ➕ Nouvelle campagne
+            </a>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-error">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        {% if campaigns %}
+        <div class="campaigns-grid">
+            {% for campaign in campaigns %}
+            <div class="campaign-card">
+                <div class="campaign-card-header">
+                    <h3>{{ campaign.title }}</h3>
+                    <span class="campaign-status status-{{ campaign.status.value }}">
+                        {% if campaign.status.value == "draft" %}
+                            Brouillon
+                        {% elif campaign.status.value == "active" %}
+                            Active
+                        {% else %}
+                            Clôturée
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="campaign-card-body">
+                    <p><strong>Établissement :</strong> {{ campaign.establishment_name }}</p>
+                    {% if campaign.sector %}
+                    <p><strong>Secteur :</strong> {{ campaign.sector }}</p>
+                    {% endif %}
+                    {% if campaign.employee_count %}
+                    <p><strong>Effectif :</strong> {{ campaign.employee_count }} employés</p>
+                    {% endif %}
+                    {% if campaign.start_date %}
+                    <p><strong>Début :</strong> {{ campaign.start_date.strftime('%d/%m/%Y') }}</p>
+                    {% endif %}
+                    {% if campaign.description %}
+                    <p class="campaign-description">{{ campaign.description[:150] }}{% if campaign.description|length > 150 %}...{% endif %}</p>
+                    {% endif %}
+                </div>
+                <div class="campaign-card-footer">
+                    <a href="/campaigns/{{ campaign.id }}" class="btn btn-small btn-primary">
+                        Voir les détails
+                    </a>
+                    <span class="campaign-date">Créée le {{ campaign.created_at.strftime('%d/%m/%Y') }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <h2>Aucune campagne pour le moment</h2>
+            <p>Commencez par créer votre première campagne NAO</p>
+            <a href="/campaigns/new" class="btn btn-primary btn-large">
+                Créer ma première campagne
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.campaigns-section {
+    padding: 3rem 0;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.page-header h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.page-header p {
+    color: var(--text-light);
+}
+
+.campaigns-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.campaign-card {
+    background: var(--bg-white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.campaign-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.campaign-card-header {
+    padding: 1.5rem;
+    background: var(--bg-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: 1rem;
+}
+
+.campaign-card-header h3 {
+    font-size: 1.25rem;
+    margin: 0;
+    flex: 1;
+}
+
+.campaign-card-body {
+    padding: 1.5rem;
+}
+
+.campaign-card-body p {
+    margin-bottom: 0.75rem;
+    color: var(--text-dark);
+}
+
+.campaign-description {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+.campaign-card-footer {
+    padding: 1rem 1.5rem;
+    background: var(--bg-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.campaign-date {
+    font-size: 0.875rem;
+    color: var(--text-light);
+}
+
+.empty-icon {
+    font-size: 5rem;
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .campaigns-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
