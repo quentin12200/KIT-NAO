@@ -20,16 +20,15 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
-    # CORS
-    CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8000"]
+    # CORS - Using string to avoid JSON parsing issues
+    CORS_ORIGINS_STR: Optional[str] = None
 
-    @field_validator('CORS_ORIGINS', mode='before')
-    @classmethod
-    def parse_cors_origins(cls, v):
-        """Parse CORS_ORIGINS from string to list."""
-        if isinstance(v, str):
-            return [origin.strip() for origin in v.split(',')]
-        return v
+    @property
+    def CORS_ORIGINS(self) -> List[str]:
+        """Get CORS origins as a list."""
+        if self.CORS_ORIGINS_STR:
+            return [origin.strip() for origin in self.CORS_ORIGINS_STR.split(',')]
+        return ["http://localhost:3000", "http://localhost:8000"]
 
     # Email (optional)
     SMTP_HOST: Optional[str] = None
