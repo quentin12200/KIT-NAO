@@ -232,6 +232,80 @@ async def campaign_new(request: Request, db: Session = Depends(get_db)):
     )
 
 
+@router.post("/campaigns/new")
+async def campaign_create(
+    request: Request,
+    db: Session = Depends(get_db),
+    title: str = Form(...),
+    establishment_name: str = Form(...),
+    sector: str = Form(None),
+    employee_count: int = Form(None),
+    collective_agreement: str = Form(None),
+    start_date: str = Form(None),
+    end_date: str = Form(None),
+    description: str = Form(None),
+    status: str = Form("draft")
+):
+    """Handle campaign creation form submission."""
+    user = await get_current_user_optional(request, db)
+    if not user:
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+
+    from app.models.campaign import Campaign
+    from datetime import datetime
+
+    try:
+        # Parse dates if provided
+        parsed_start_date = None
+        parsed_end_date = None
+        if start_date:
+            parsed_start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
+        if end_date:
+            parsed_end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
+
+        # Create campaign
+        new_campaign = Campaign(
+            title=title,
+            establishment_name=establishment_name,
+            sector=sector,
+            employee_count=employee_count,
+            collective_agreement=collective_agreement,
+            organization_id=user.organization_id,
+            start_date=parsed_start_date,
+            end_date=parsed_end_date,
+            description=description,
+            status=status
+        )
+
+        db.add(new_campaign)
+        db.commit()
+        db.refresh(new_campaign)
+
+        # Redirect to campaign detail page
+        return RedirectResponse(
+            url=f"/campaigns/{new_campaign.id}",
+            status_code=status.HTTP_303_SEE_OTHER
+        )
+
+    except Exception as e:
+        db.rollback()
+        from app.models.organization import Organization
+        organizations = None
+        if user.is_superuser:
+            organizations = db.query(Organization).all()
+
+        return templates.TemplateResponse(
+            "campaign_new.html",
+            {
+                "request": request,
+                "user": user,
+                "organizations": organizations,
+                "error": f"Erreur lors de la création: {str(e)}"
+            },
+            status_code=400
+        )
+
+
 @router.get("/campaigns/{campaign_id}", response_class=HTMLResponse)
 async def campaign_detail(
     request: Request,

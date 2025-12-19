@@ -18,7 +18,7 @@
         {% endif %}
 
         <div class="form-card">
-            <form id="campaignForm" class="campaign-form">
+            <form method="POST" action="/campaigns/new" class="campaign-form">
                 <div class="form-section-title">
                     <h2>Informations générales</h2>
                 </div>
@@ -99,8 +99,6 @@
                         </select>
                     </div>
                 </div>
-                {% else %}
-                <input type="hidden" id="organization_id" name="organization_id" value="{{ user.organization_id or 1 }}">
                 {% endif %}
 
                 <div class="form-section-title">
@@ -274,68 +272,5 @@ textarea:focus {
 {% endblock %}
 
 {% block extra_js %}
-<script>
-document.getElementById('campaignForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const formData = {
-        title: document.getElementById('title').value,
-        establishment_name: document.getElementById('establishment_name').value,
-        sector: document.getElementById('sector').value || null,
-        employee_count: document.getElementById('employee_count').value ? parseInt(document.getElementById('employee_count').value) : null,
-        collective_agreement: document.getElementById('collective_agreement').value || null,
-        organization_id: parseInt(document.getElementById('organization_id').value),
-        start_date: document.getElementById('start_date').value || null,
-        end_date: document.getElementById('end_date').value || null,
-        description: document.getElementById('description').value || null,
-        status: document.getElementById('status').value
-    };
-
-    try {
-        // Get token from cookie
-        const token = document.cookie
-            .split('; ')
-            .find(row => row.startsWith('access_token='))
-            ?.split('=')[1];
-
-        if (!token) {
-            console.log('No token found, redirecting to login');
-            window.location.href = '/login';
-            return;
-        }
-
-        console.log('Sending campaign creation request...');
-        const response = await fetch('/api/campaigns/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': token
-            },
-            body: JSON.stringify(formData)
-        });
-
-        console.log('Response status:', response.status);
-
-        if (response.status === 401 || response.status === 403) {
-            console.log('Authentication error, redirecting to login');
-            alert('Session expirée. Veuillez vous reconnecter.');
-            window.location.href = '/login';
-            return;
-        }
-
-        const data = await response.json();
-        console.log('Response data:', data);
-
-        if (response.ok) {
-            console.log('Campaign created successfully, redirecting to:', '/campaigns/' + data.id);
-            window.location.href = '/campaigns/' + data.id;
-        } else {
-            alert('Erreur: ' + (data.detail || 'Erreur lors de la création de la campagne'));
-        }
-    } catch (error) {
-        console.error('Error creating campaign:', error);
-        alert('Erreur de connexion au serveur: ' + error.message);
-    }
-});
-</script>
+<!-- Form submits directly to server, no JavaScript needed -->
 {% endblock %}
