@@ -11,8 +11,8 @@ from app.database import engine, Base
 # Import routers
 from app.routers import auth, campaigns, documents, organizations
 
-# Create database tables
-Base.metadata.create_all(bind=engine)
+# Database tables are created via Alembic migrations (see railway.toml)
+# Base.metadata.create_all(bind=engine)  # Commented out to avoid conflicts with Alembic
 
 # Create FastAPI app
 app = FastAPI(
@@ -36,9 +36,11 @@ static_dir = os.path.join(os.path.dirname(__file__), "static")
 if os.path.exists(static_dir):
     app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
-# Setup templates
+# Setup templates (optional - only if directory has templates)
 templates_dir = os.path.join(os.path.dirname(__file__), "templates", "web")
-templates = Jinja2Templates(directory=templates_dir)
+templates = None
+if os.path.exists(templates_dir) and os.listdir(templates_dir):
+    templates = Jinja2Templates(directory=templates_dir)
 
 # Include routers
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
