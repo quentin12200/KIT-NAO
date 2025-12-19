@@ -9,7 +9,7 @@ from app.config import settings
 from app.database import engine, Base
 
 # Import routers
-from app.routers import auth, campaigns, documents, organizations
+from app.routers import auth, campaigns, documents, organizations, web
 
 # Database tables are created via Alembic migrations (see railway.toml)
 # Base.metadata.create_all(bind=engine)  # Commented out to avoid conflicts with Alembic
@@ -43,20 +43,14 @@ if os.path.exists(templates_dir) and os.listdir(templates_dir):
     templates = Jinja2Templates(directory=templates_dir)
 
 # Include routers
+# Web routes (HTML pages) - must be included first
+app.include_router(web.router, tags=["Web"])
+
+# API routes
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(campaigns.router, prefix="/api/campaigns", tags=["Campaigns"])
 app.include_router(documents.router, prefix="/api/documents", tags=["Documents"])
 app.include_router(organizations.router, prefix="/api/organizations", tags=["Organizations"])
-
-
-@app.get("/")
-async def root():
-    """Root endpoint."""
-    return {
-        "message": "Bienvenue sur la Plateforme NAO",
-        "version": settings.APP_VERSION,
-        "docs": "/docs",
-    }
 
 
 @app.get("/health")

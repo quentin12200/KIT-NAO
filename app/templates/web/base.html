@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Plateforme NAO{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="/">📋 Plateforme NAO</a>
+            </div>
+            <div class="nav-menu">
+                {% if user %}
+                    <a href="/dashboard">Tableau de bord</a>
+                    <a href="/campaigns">Campagnes</a>
+                    <a href="/logout" class="btn btn-outline">Déconnexion</a>
+                {% else %}
+                    <a href="/login">Connexion</a>
+                    <a href="/register" class="btn btn-primary">S'inscrire</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Plateforme NAO - Négociations Annuelles Obligatoires</p>
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

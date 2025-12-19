@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Connexion - Plateforme NAO{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="container">
+        <div class="auth-card">
+            <h1>Connexion</h1>
+            <p class="auth-subtitle">Accédez à votre compte Plateforme NAO</p>
+
+            {% if error %}
+            <div class="alert alert-error">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="POST" action="/login" class="auth-form">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="username"
+                        required
+                        placeholder="votre.email@exemple.com"
+                        autocomplete="email"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        required
+                        placeholder="••••••••"
+                        autocomplete="current-password"
+                    >
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">
+                    Se connecter
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Pas encore de compte ? <a href="/register">S'inscrire</a></p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Inscription - Plateforme NAO{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="container">
+        <div class="auth-card">
+            <h1>Inscription</h1>
+            <p class="auth-subtitle">Créez votre compte pour commencer</p>
+
+            {% if error %}
+            <div class="alert alert-error">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            {% if success %}
+            <div class="alert alert-success">
+                {{ success }}
+            </div>
+            {% endif %}
+
+            <form id="registerForm" class="auth-form">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        required
+                        placeholder="votre.email@exemple.com"
+                        autocomplete="email"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="full_name">Nom complet</label>
+                    <input
+                        type="text"
+                        id="full_name"
+                        name="full_name"
+                        placeholder="Jean Dupont"
+                        autocomplete="name"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        required
+                        minlength="8"
+                        maxlength="72"
+                        placeholder="••••••••"
+                        autocomplete="new-password"
+                    >
+                    <small>Minimum 8 caractères</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="role">Rôle</label>
+                    <select id="role" name="role">
+                        <option value="reader">Lecteur</option>
+                        <option value="contributor">Contributeur</option>
+                        <option value="admin">Administrateur</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">
+                    Créer mon compte
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Déjà un compte ? <a href="/login">Se connecter</a></p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const formData = {
+        email: document.getElementById('email').value,
+        full_name: document.getElementById('full_name').value,
+        password: document.getElementById('password').value,
+        role: document.getElementById('role').value
+    };
+
+    try {
+        const response = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            window.location.href = '/login?registered=true';
+        } else {
+            alert('Erreur: ' + (data.detail || 'Erreur lors de l\'inscription'));
+        }
+    } catch (error) {
+        alert('Erreur de connexion au serveur');
+    }
+});
+</script>
+{% endblock %}

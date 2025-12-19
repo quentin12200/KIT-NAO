@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Tableau de bord - Plateforme NAO{% endblock %}
+
+{% block content %}
+<section class="dashboard">
+    <div class="container">
+        <div class="dashboard-header">
+            <h1>Tableau de bord</h1>
+            <p>Bienvenue, {{ user.full_name or user.email }}</p>
+        </div>
+
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <div class="stat-icon">📋</div>
+                <div class="stat-content">
+                    <h3>Campagnes actives</h3>
+                    <p class="stat-number">{{ campaigns_count or 0 }}</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📄</div>
+                <div class="stat-content">
+                    <h3>Documents générés</h3>
+                    <p class="stat-number">{{ documents_count or 0 }}</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-content">
+                    <h3>Organisations</h3>
+                    <p class="stat-number">{{ organizations_count or 0 }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-content">
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <h2>Campagnes récentes</h2>
+                    <a href="/campaigns/new" class="btn btn-primary">Nouvelle campagne</a>
+                </div>
+                <div class="campaigns-list">
+                    {% if campaigns %}
+                        {% for campaign in campaigns %}
+                        <div class="campaign-item">
+                            <div class="campaign-info">
+                                <h3>{{ campaign.title }}</h3>
+                                <p>{{ campaign.description }}</p>
+                                <span class="campaign-status status-{{ campaign.status }}">
+                                    {{ campaign.status }}
+                                </span>
+                            </div>
+                            <div class="campaign-actions">
+                                <a href="/campaigns/{{ campaign.id }}" class="btn btn-small">Voir</a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <p>Aucune campagne pour le moment</p>
+                            <a href="/campaigns/new" class="btn btn-primary">Créer votre première campagne</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <h2>Actions rapides</h2>
+                </div>
+                <div class="quick-actions">
+                    <a href="/campaigns/new" class="action-card">
+                        <div class="action-icon">➕</div>
+                        <h3>Nouvelle campagne</h3>
+                        <p>Lancer une nouvelle campagne NAO</p>
+                    </a>
+                    <a href="/documents" class="action-card">
+                        <div class="action-icon">📄</div>
+                        <h3>Générer un document</h3>
+                        <p>Créer un BDES, PV ou autre document</p>
+                    </a>
+                    <a href="/api/docs" class="action-card">
+                        <div class="action-icon">🔧</div>
+                        <h3>API Documentation</h3>
+                        <p>Accéder à la documentation technique</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
