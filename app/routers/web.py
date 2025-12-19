@@ -201,6 +201,21 @@ async def campaign_new(request: Request, db: Session = Depends(get_db)):
 
     from app.models.organization import Organization
 
+    # Create default organization if user doesn't have one
+    if not user.organization_id:
+        default_org = Organization(
+            name=f"Organisation de {user.full_name or user.email}",
+            description="Organisation créée automatiquement"
+        )
+        db.add(default_org)
+        db.commit()
+        db.refresh(default_org)
+
+        # Update user's organization
+        user.organization_id = default_org.id
+        db.commit()
+        db.refresh(user)
+
     # Get organizations for dropdown
     organizations = None
     if user.is_superuser:

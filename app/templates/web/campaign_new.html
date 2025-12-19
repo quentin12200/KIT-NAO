@@ -299,10 +299,12 @@ document.getElementById('campaignForm').addEventListener('submit', async (e) => 
             ?.split('=')[1];
 
         if (!token) {
+            console.log('No token found, redirecting to login');
             window.location.href = '/login';
             return;
         }
 
+        console.log('Sending campaign creation request...');
         const response = await fetch('/api/campaigns/', {
             method: 'POST',
             headers: {
@@ -312,15 +314,27 @@ document.getElementById('campaignForm').addEventListener('submit', async (e) => 
             body: JSON.stringify(formData)
         });
 
+        console.log('Response status:', response.status);
+
+        if (response.status === 401 || response.status === 403) {
+            console.log('Authentication error, redirecting to login');
+            alert('Session expirée. Veuillez vous reconnecter.');
+            window.location.href = '/login';
+            return;
+        }
+
         const data = await response.json();
+        console.log('Response data:', data);
 
         if (response.ok) {
+            console.log('Campaign created successfully, redirecting to:', '/campaigns/' + data.id);
             window.location.href = '/campaigns/' + data.id;
         } else {
             alert('Erreur: ' + (data.detail || 'Erreur lors de la création de la campagne'));
         }
     } catch (error) {
-        alert('Erreur de connexion au serveur');
+        console.error('Error creating campaign:', error);
+        alert('Erreur de connexion au serveur: ' + error.message);
     }
 });
 </script>
